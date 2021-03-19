@@ -1,15 +1,17 @@
 # Button.py
 # Tawfeeq Mannan
-# Last updated 2021/03/18
+# Last updated 2021/03/19
 
 # imports
 import pygame
+from abspath import absolute_path
 
 
 # class definition
 class Button:
     def __init__(self, x, y, w, h, c, \
-        state=True, disabled=False, hold=False, img="img/default.png"):
+        state=True, disabled=False, hold=False, \
+            img=absolute_path("img/default.png")):
         self.rect = pygame.Rect(x, y, w, h)
 
         self.colour1 = c[0]  # state 1

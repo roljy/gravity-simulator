@@ -1,10 +1,11 @@
-# main.py
+# gravity.py
 # Tawfeeq Mannan
-# Last updated 2021/03/18
+# Last updated 2021/03/19
 
 # imports
 import pygame
 import sys
+from abspath import absolute_path
 from Button import Button
 from Celestial import inelastic_collision, elastic_collision
 from setup import helpMsg, getCelestials, allCelestials, allStaticBodies
@@ -40,23 +41,23 @@ buttons = {
     "gravity" : Button(10, 10, 40, 40, \
         (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
             state=True, disabled=False, hold=False, \
-                img="img/gravity.png"),
+                img=absolute_path("img/gravity.png")),
     "elastic" : Button(60, 10, 40, 40, \
         (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
             state=False, disabled=True, hold=False, \
-                img="img/elastic.png"),
+                img=absolute_path("img/elastic.png")),
     "reverse" : Button(WIDTH - 150, 10, 40, 40, \
         (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
             state=False, disabled=False, hold=False, \
-                img="img/reverse.png"),
+                img=absolute_path("img/reverse.png")),
     "playpause" : Button(WIDTH - 100, 10, 40, 40, \
         (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
             state=False, disabled=False, hold=False, \
-                img="img/playpause.png"),
+                img=absolute_path("img/playpause.png")),
     "skip" : Button(WIDTH - 50, 10, 40, 40, \
         (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
             state=False, disabled=False, hold=True, \
-                img="img/skip.png"),
+                img=absolute_path("img/skip.png")),
 }
 
 
@@ -164,7 +165,7 @@ else:
 pygame.init()
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Gravity Simulator")
-pygame.display.set_icon(pygame.image.load("img/planets.ico"))
+pygame.display.set_icon(pygame.image.load(absolute_path("img/planets.ico")))
 clock = pygame.time.Clock()
 
 
