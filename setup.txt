@@ -1,20 +1,36 @@
-# 100k circular orbit
-DAYS = 37
-x3 = [100000]
-y3 = [0]
+# 50k parking orbit --> low lunar orbit. 1805 m/s
 vx = 0
-vy = 2.0
+vy = 2.82
+x3 = [50000]
+y3 = [0]
+MANEUVERS = [
+    (22.0 * 3600, 0.895),
+    (530460, 0.52),
+    (1742820, -0.39),
+]
 
-# 230k circular orbit
-DAYS = 116
-x3 = [230000]
-y3 = [0]
+# 50k parking orbit --> lunar orbit. 1300 m/s
 vx = 0
-vy = 1.3
+vy = 2.82
+x3 = [50000]
+y3 = [0]
+MANEUVERS = [
+    (63300, 0.93),
+    (2453700, -0.37),
+]
 
-# 370k lunar orbit
-DAYS = 275
-x3 = [230000]
-y3 = [0]
+# L3 Halo orbit
 vx = 0
-vy = 1.3
+vy = - OMEGA * R + 0.01
+x3 = [- R + 3000]
+y3 = [0]
+MANEUVERS = [
+]
+
+# attempted lunar capture from low earth orbit
+vx = 0
+vy = 8.81
+x3 = [10000]
+y3 = [0]
+MANEUVERS = [
+]
