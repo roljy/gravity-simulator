@@ -5,6 +5,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.colors import LinearSegmentedColormap
+import numpy as np
 from setup import helpMsg, getCelestials, allCelestials, allStaticBodies, \
     daysList, trimList
 
@@ -13,12 +14,23 @@ from setup import helpMsg, getCelestials, allCelestials, allStaticBodies, \
 celestials = []
 fig = plt.figure()
 ax = fig.add_subplot(111)
+sc = []
 
 
 # function definitions
 def stripLists(trimAmount, *lists):
     for lst in lists:
         lst[:] = lst[::trimAmount]
+
+
+def updatePlot(i):
+    global celestials, sc
+    if i == 0:
+        plt.pause(1.5)
+    for j in range(len(sc)):
+        sc[j].set_offsets( np.c_[celestials[j].x[:i + 1], \
+            celestials[j].y[:i + 1]] )
+        sc[j].set_array( np.array(range(len(celestials[j].x))) )
 
 
 # welcome message
@@ -92,6 +104,9 @@ while t <= T_TOTAL:
 print("Simulation complete. Plotting celestial positions on grid...")
 for c in celestials:
     stripLists(TRIM, c.x, c.y, c.vx, c.vy)
+    dotSize = c.r / 500 if c.r != 0 else 0.5
+    scat = ax.scatter([], [], s=dotSize)
+    sc.append(scat)
 
 
 # prepare graph axes, titles
@@ -121,13 +136,9 @@ ax.set(xlabel="Distance across x-axis (km)", \
 
 
 # plot
-for c in celestials:
-    dotSize = c.r / 500 if c.r != 0 else 0.5
-    ax.scatter(c.x, c.y, s=dotSize, c=range(len(c.x)), cmap="cool")
-
-    ax.annotate(celestials.index(c) + 1, (c.x[-1], c.y[-1]), \
-        xytext=(c.x[-1] + 20000, c.y[-1] + 20000), \
-        arrowprops={"arrowstyle": "->"}, color="green", weight="bold")
+_ = animation.FuncAnimation(fig, updatePlot, \
+    frames=range( 0, (T_TOTAL // (T_STEP * TRIM)) + 1, 12 ), \
+        interval=50, repeat=False)
 
 fig.subplots_adjust(left=0.125, right=0.875, top=0.95, bottom=0.05)
 print("Plotting complete. Loading graph...")
