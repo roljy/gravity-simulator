@@ -5,7 +5,7 @@
 from math import sqrt, sin, cos, atan, pi
 
 
-# class definitions
+# class definition
 class Celestial:
     def __init__(self, x, y, vx=0, vy=0, Gm=0, r=0):
         self.x = [x]
@@ -31,7 +31,6 @@ class Celestial:
             ay -= (c.mu * (self.y[index] - c.y[index])) / \
                 c.getScalarDistanceTo(self.x[index], self.y[index], \
                     forwardsTime) ** 3
-            # if abs(ax) > 0.1 or abs(ay) > 0.1:
             if c.getScalarDistanceTo(self.x[index], self.y[index], \
                 forwardsTime) < c.r + self.r:
                 return False
