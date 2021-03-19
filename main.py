@@ -1,49 +1,139 @@
 # main.py
 # Tawfeeq Mannan
+# Last updated 2021/03/18
 
 # imports
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.colors import LinearSegmentedColormap
-import numpy as np
-from setup import helpMsg, getCelestials, allCelestials, allStaticBodies, \
-    daysList, trimList
+import pygame
+import sys
+from Button import Button
+from Celestial import inelastic_collision, elastic_collision
+from setup import helpMsg, getCelestials, allCelestials, allStaticBodies
+
+
+# consts
+WIDTH = 1280
+HEIGHT = 720
+FPS = 120
+T_STEP = 360
+COLOURS = {
+    "BLACK" : (0, 0, 0),
+    "WHITE" : (255, 255, 255),
+    "GREY" : (127, 127, 127),
+    "RED" : (255, 0, 0),
+    "ORANGE" : (255, 160, 0),
+    "YELLOW" : (255, 255, 0),
+    "GREEN" : (0, 255, 0),
+    "CYAN" : (0, 255, 255),
+    "PINK" : (255, 0, 160),
+}
 
 
 # global vars
 celestials = []
-fig = plt.figure()
-ax = fig.add_subplot(111)
-sc = []
+t = 0
+lastCollisionTime = 0
+isRunning = True
+
+
+# buttons
+buttons = {
+    "gravity" : Button(10, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=True, disabled=False, hold=False, \
+                img="img/gravity.png"),
+    "elastic" : Button(60, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=True, hold=False, \
+                img="img/elastic.png"),
+    "reverse" : Button(WIDTH - 150, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=False, hold=False, \
+                img="img/reverse.png"),
+    "playpause" : Button(WIDTH - 100, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=False, hold=False, \
+                img="img/playpause.png"),
+    "skip" : Button(WIDTH - 50, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=False, hold=True, \
+                img="img/skip.png"),
+}
 
 
 # function definitions
-def stripLists(trimAmount, *lists):
-    for lst in lists:
-        lst[:] = lst[::trimAmount]
+def move_bodies(forwardsTime, gravity, previousCollisions):
+    global celestials, t, lastCollisionTime, T_STEP
+    collisions = set()
+
+    # move all bodies and record all collision pairs
+    for i in range(len(celestials)):
+        if i in staticBodies:
+            continue
+
+        otherMasses = [c for j, c in enumerate(celestials) if \
+            j != i and c.mu != 0]
+        contact = celestials[i].move(otherMasses, T_STEP, \
+            forwardsTime, gravity)
+        
+        if contact:
+            j = celestials.index(contact)
+            collisions.add( (min(i, j), max(i, j)) )
+
+    # do not re-simulate a collision that just happened last frame
+    if not collisions == previousCollisions:
+        for collision in collisions:
+            i, j = collision
+            elasticOverride = False
+
+            # elastic collision
+            if contact and buttons["elastic"].isPressed:
+                v1 = celestials[i].vx ** 2 + celestials[i].vy ** 2
+                v2 = celestials[j].vx ** 2 + celestials[j].vy ** 2
+                if buttons["gravity"].isPressed and (v1 < 1 or v2 < 1 or \
+                    t - lastCollisionTime <= T_STEP * 10):
+                    # do inelastic collision if scuffed
+                    print("Elastic collision overridden to inelastic.")
+                    elasticOverride = True
+                else:
+                    celestials[i].vx, celestials[i].vy, \
+                        celestials[j].vx, celestials[j].vy = \
+                            elastic_collision(celestials[i], celestials[j])
+                    print("Collision detected at", t, "seconds")
+                    print('(' + str(t // 3600 // 24) + ' days)')
+
+            # inelastic collision
+            if not buttons["elastic"].isPressed or elasticOverride:
+                merged = inelastic_collision(celestials[i], celestials[j])
+                celestials.pop(j)
+                celestials.pop(i)
+                celestials.append(merged)
+                print("Collision detected at", t, "seconds")
+                print('(' + str(t // 3600 // 24) + ' days)')
+
+    # update time
+    lastCollisionTime = t if collisions else lastCollisionTime
+    timeChange = T_STEP * (-1 if buttons["reverse"].isPressed else 1)
+    t += timeChange
+    return collisions
 
 
-def updatePlot(i):
-    global celestials, sc
-    if i == 0:
-        plt.pause(1.5)
-    for j in range(len(sc)):
-        sc[j].set_offsets( np.c_[celestials[j].x[:i + 1], \
-            celestials[j].y[:i + 1]] )
-        sc[j].set_array( np.array(range(len(celestials[j].x))) )
+def draw_bodies(surface):
+    global celestials
+    for i in range(len(celestials)):
+        x = WIDTH / 2 + celestials[i].x / 1500
+        y = HEIGHT / 2 - celestials[i].y / 1500
+        dotSize = celestials[i].r / 1500 if celestials[i].r != 0 else 1.5
+        colour = list(COLOURS.values())[i % (len(COLOURS) - 3) + 3]
+        pygame.draw.circle(surface, colour, (x, y), dotSize)
 
 
 # welcome message
 print("\nThanks for using my gravity simulator!")
-print("I've prepared 5 demo setups, or you can create one on your own!")
-print("When the image eventually loads, remember to fullscreen it for \
-best results.")
-print("The path of each body will be shown by dotted lines, going from \
-cyan to magenta as time passes.")
+print("I've prepared 6 demo setups, or you can create one on your own!")
+print("The simulation opens in a new window. You may need to click on it.")
+print("Elastic collisions are coming soon!")
 print("Go ahead and enter a number for your selection below:")
 
-
-plt.rcParams["image.cmap"] = "cool"
 
 # select system to simulate based on user input
 print('\n' + helpMsg)
@@ -57,96 +147,67 @@ while True:
         print()
         break
     except ValueError:
-        print("Please enter an integer between 0 and 5.\n")
+        print("Please enter an integer between 0 and 6.\n")
 
 
 # use user choice to define variables
 staticBodies = []
-DAYS = 0
-TRIM = 0
 
 if choice != 0:
     celestials = allCelestials[choice - 1]
     staticBodies = allStaticBodies[choice - 1]
-    DAYS = daysList[choice - 1]
-    TRIM = trimList[choice - 1]
 else:
-    celestials, staticBodies, DAYS = getCelestials()
-    TRIM = 60
+    celestials, staticBodies = getCelestials()
 
 
-# wrap up variable declarations/definitions
-t = 0
-T_STEP = 60
-T_TOTAL = DAYS * 24 * 3600
+# initialize pygame
+pygame.init()
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Gravity Simulator")
+pygame.display.set_icon(pygame.image.load("img/planets.ico"))
+clock = pygame.time.Clock()
 
 
-# motion execution
+# running loop
 print("Celestial bodies loaded. Running simulation...")
-collision = False
-while t <= T_TOTAL:
-    for i in range(len(celestials)):
-        if i in staticBodies:
-            continue
-        otherMasses = [c for j, c in enumerate(celestials) if \
-            j != i and c.mu != 0]
-        if not celestials[i].move(otherMasses, T_STEP):
-            collision = True
-            break
+lastCollisions, collTime = set(), 0  # for debouncing
+while isRunning:
+    # screen refresh
+    clock.tick(FPS)
+    SCREEN.fill(COLOURS["BLACK"])
+
+    # event handling (button presses, quit)
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            isRunning = False
+
+        for button in buttons.values():
+            button.handle_event(event)
     
-    if collision:
-        print("Collision detected at", t, "seconds")
-        print('(' + str(t // 3600 // 24) + ' days)')
-        break
+    # motion execution
+    collisions = set()
 
-    t += T_STEP
+    if buttons["playpause"].isPressed and buttons["skip"].isPressed:
+        FPS = 360  # fast forward
+        collisions = move_bodies(not buttons["reverse"].isPressed, \
+            buttons["gravity"].isPressed, lastCollisions)
 
-print("Simulation complete. Plotting celestial positions on grid...")
-for c in celestials:
-    stripLists(TRIM, c.x, c.y, c.vx, c.vy)
-    dotSize = c.r / 500 if c.r != 0 else 0.5
-    scat = ax.scatter([], [], s=dotSize)
-    sc.append(scat)
+    elif buttons["playpause"].isPressed or buttons["skip"].isPressed:
+        FPS = 120  # normal speed
+        collisions = move_bodies(not buttons["reverse"].isPressed, \
+            buttons["gravity"].isPressed, lastCollisions)
+    
+    lastCollisions = collisions
 
+    # draw all celestials and update screen
+    draw_bodies(SCREEN)
+    for button in buttons.values():
+        button.draw(SCREEN)
 
-# prepare graph axes, titles
-timeString = ""
-minutes = TRIM * T_STEP // 60
-if 60 <= minutes < 120:
-    timeString = "hour"
-elif minutes >= 120:
-    timeString = str(minutes // 60) + " hours"
-elif minutes == 1:
-    timeString = "minute"
-else:
-    timeString = str(minutes) + " minutes"
+    pygame.display.update()
+    
 
-fig.suptitle("Positions of " + str(len(celestials)) + \
-    " bodies every " + timeString + " over the course of " + \
-        str(t // 3600 // 24) + " days")
-
-ax.axis([-820000, 820000, -500000, 500000])
-ax.grid(b=True, which="major")
-ax.grid(b=True, which="minor", alpha=0.2)
-ax.minorticks_on()
-ax.set_axisbelow(True)
-
-ax.set(xlabel="Distance across x-axis (km)", \
-    ylabel="Distance across y-axis (km)")
-
-
-# plot
-_ = animation.FuncAnimation(fig, updatePlot, \
-    frames=range( 0, (T_TOTAL // (T_STEP * TRIM)) + 1, 12 ), \
-        interval=50, repeat=False)
-
-fig.subplots_adjust(left=0.125, right=0.875, top=0.95, bottom=0.05)
-print("Plotting complete. Loading graph...")
-
-plt.show()
-
-
-# exit message
-print("\nTo run another simulation, you can restart this program.")
-input("Press Enter to quit the program: ")
-print("Thanks for using the gravity simulator!")
+# cleanup and exit
+pygame.display.quit()
+pygame.quit()
+sys.exit()

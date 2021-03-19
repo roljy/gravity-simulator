@@ -1,5 +1,6 @@
 # Celestial.py
 # Tawfeeq Mannan
+# Last updated 2021/03/18
 
 # imports
 from math import sqrt, sin, cos, atan, pi
@@ -8,58 +9,144 @@ from math import sqrt, sin, cos, atan, pi
 # class definition
 class Celestial:
     def __init__(self, x, y, vx=0, vy=0, Gm=0, r=0):
-        self.x = [x]
-        self.y = [y]
-        self.vx = [vx]
-        self.vy = [vy]
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
         self.mu = Gm
         self.r = r
 
 
-    def getScalarDistanceTo(self, x, y, forwardsTime=True):
-        index = -1 if forwardsTime else 0
-        return sqrt((self.x[index] - x) ** 2 + (self.y[index] - y) ** 2)
+    def get_scalar_distance_to(self, x, y):
+        return sqrt((self.x - x) ** 2 + (self.y - y) ** 2)
 
 
-    def move(self, celestials, timeStep, forwardsTime=True):
-        index = -1 if forwardsTime else 0
+    def move(self, celestials, timeStep, forwardsTime=True, gravity=True):
         ax, ay = 0, 0
+        crashedWith = 0
         for c in celestials:
-            ax -= (c.mu * (self.x[index] - c.x[index])) / \
-                c.getScalarDistanceTo(self.x[index], self.y[index], \
-                    forwardsTime) ** 3
-            ay -= (c.mu * (self.y[index] - c.y[index])) / \
-                c.getScalarDistanceTo(self.x[index], self.y[index], \
-                    forwardsTime) ** 3
-            if c.getScalarDistanceTo(self.x[index], self.y[index], \
-                forwardsTime) < c.r + self.r:
-                return False
+            # check for collision
+            if c.get_scalar_distance_to(self.x, self.y) < c.r + self.r:
+                crashedWith = c
         
+            # add gravitational field (negative) of all the other bodies
+            if gravity:
+                ax -= (c.mu * (self.x - c.x)) / \
+                    c.get_scalar_distance_to(self.x, self.y) ** 3
+                ay -= (c.mu * (self.y - c.y)) / \
+                    c.get_scalar_distance_to(self.x, self.y) ** 3
+            
+        # integrate acceleration to get new velocities and positions
         if forwardsTime:
-            self.vx.append(self.vx[index] + ax * timeStep)
-            self.vy.append(self.vy[index] + ay * timeStep)
-            self.x.append(self.x[index] + self.vx[index] * timeStep)
-            self.y.append(self.y[index] + self.vy[index] * timeStep)
+            self.vx = self.vx + ax * timeStep
+            self.vy = self.vy + ay * timeStep
+            self.x = self.x + self.vx * timeStep
+            self.y = self.y + self.vy * timeStep
         else:
-            self.vx.insert(index, self.vx[index] - ax * timeStep)
-            self.vy.insert(index, self.vy[index] - ay * timeStep)
-            self.x.insert(index, self.x[index] - self.vx[index] * timeStep)
-            self.y.insert(index, self.y[index] - self.vy[index] * timeStep)
+            self.vx = self.vx - ax * timeStep
+            self.vy = self.vy - ay * timeStep
+            self.x = self.x - self.vx * timeStep
+            self.y = self.y - self.vy * timeStep
         
-        return True
+        return crashedWith
 
     
     def maneuver(self, tangent=True, dv=0, dvx=0, dvy=0):
         # assume forwards time. no maneuvers allowed in backwards time
         if tangent:
-            angle = atan(self.vy[-1] / self.vx[-1])
-            if self.vx[-1] <= 0 and self.vy[-1] <= 0:
+            angle = atan(self.vy / self.vx)
+            if self.vx <= 0 and self.vy <= 0:
                 angle += pi  # Q1 --> Q3
-            elif self.vx[-1] <= 0 and self.vy[-1] >= 0:
+            elif self.vx <= 0 and self.vy >= 0:
                 angle += pi  # Q4 --> Q2
-            self.vx.append(self.vx[-1] + dv * cos(angle))
-            self.vy.append(self.vy[-1] + dv * sin(angle))
+            self.vx = self.vx + dv * cos(angle)
+            self.vy = self.vy + dv * sin(angle)
         
         else:
-            self.vx.append(self.vx[-1] + dvx)
-            self.vy.append(self.vy[-1] + dvy)
+            self.vx += dvx
+            self.vy += dvy
+
+
+# function definitions
+def inelastic_collision(a, b):
+    totalMass = a.mu + b.mu
+
+    # new velocity components based on conservation of momentum
+    px = a.mu * a.vx + b.mu * b.vx
+    vx = px / totalMass
+    py = a.mu * a.vy + b.mu * b.vy
+    vy = py / totalMass
+    
+    # new position at centre of mass
+    x = (a.mu * a.x + b.mu * b.x) / totalMass
+    y = (a.mu * a.y + b.mu * b.y) / totalMass
+
+    # new radius to reflect sum of area
+    r = sqrt(a.r ** 2 + b.r ** 2)
+
+    return Celestial(x, y, vx, vy, totalMass, r)
+
+
+def elastic_collision(a, b):
+    totalMass = a.mu + b.mu
+    massDiff = a.mu - b.mu
+
+    # calculate relevant angles
+    try:
+        theta1 = atan(a.vy / a.vx)
+    except ZeroDivisionError:
+        if a.vy >= 0:
+            theta1 = pi / 2
+        else:
+            theta1 = - pi / 2
+    if a.vx <= 0 and a.vy <= 0:
+        theta1 += pi  # Q1 --> Q3
+    elif a.vx <= 0 and a.vy >= 0:
+        theta1 += pi  # Q4 --> Q2
+
+    try:
+        theta2 = atan(b.vy / b.vx)
+    except ZeroDivisionError:
+        if b.vy >= 0:
+            theta2 = pi / 2
+        else:
+            theta2 = - pi / 2
+    if b.vx <= 0 and b.vy <= 0:
+        theta2 += pi  # Q1 --> Q3
+    elif b.vx <= 0 and b.vy >= 0:
+        theta2 += pi  # Q4 --> Q2
+
+    try:
+        phi = atan( (b.y - a.y) / (b.x - a.x) )
+    except ZeroDivisionError:
+        if (b.y - a.y) >= 0:
+            phi = pi / 2
+        else:
+            phi = - pi / 2
+    if (b.x - a.x) <= 0 and (b.y - a.y) <= 0:
+        phi += pi  # Q1 --> Q3
+    elif (b.x - a.x) <= 0 and (b.y - a.y) >= 0:
+        phi += pi  # Q4 --> Q2
+    
+    # calculate magnitudes of velocities. needed for equation
+    v1 = sqrt(a.vx ** 2 + a.vy ** 2)
+    v2 = sqrt(b.vx ** 2 + b.vy ** 2)
+
+    # calculate new velocity components. equation from wikipedia
+    vax = (v1 * cos(theta1 - phi) * massDiff + \
+        2 * b.mu * v2 * cos(theta2 - phi)) / totalMass * cos(phi) + \
+            v1 * sin(theta1 - phi) * cos(phi + pi / 2)
+
+    vay = (v1 * cos(theta1 - phi) * massDiff + \
+        2 * b.mu * v2 * cos(theta2 - phi)) / totalMass * sin(phi) + \
+            v1 * sin(theta1 - phi) * sin(phi + pi / 2)
+
+    vbx = (v2 * cos(theta2 - phi) * massDiff + \
+        2 * a.mu * v1 * cos(theta1 - phi)) / totalMass * cos(phi) + \
+            v2 * sin(theta2 - phi) * cos(phi + pi / 2)
+
+    vby = (v2 * cos(theta2 - phi) * massDiff + \
+        2 * a.mu * v1 * cos(theta1 - phi)) / totalMass * sin(phi) + \
+            v2 * sin(theta2 - phi) * sin(phi + pi / 2)
+    
+    return vax, vay, vbx, vby
