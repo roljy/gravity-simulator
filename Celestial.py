@@ -1,6 +1,6 @@
 # Celestial.py
 # Tawfeeq Mannan
-# Last updated 2021/03/18
+# Last updated 2021/03/20
 
 # imports
 from math import sqrt, sin, cos, atan, pi
@@ -54,9 +54,12 @@ class Celestial:
     def maneuver(self, tangent=True, dv=0, dvx=0, dvy=0):
         # assume forwards time. no maneuvers allowed in backwards time
         if tangent:
-            angle = atan(self.vy / self.vx)
+            try:
+                angle = atan(self.vy / self.vx)
+            except ZeroDivisionError:
+                angle = pi / 2
             if self.vx <= 0 and self.vy <= 0:
-                angle += pi  # Q1 --> Q3
+                angle += pi  # Q1 --> Q3, pi/2 --> 3pi/2
             elif self.vx <= 0 and self.vy >= 0:
                 angle += pi  # Q4 --> Q2
             self.vx = self.vx + dv * cos(angle)
@@ -89,42 +92,36 @@ def inelastic_collision(a, b):
 
 def elastic_collision(a, b):
     totalMass = a.mu + b.mu
-    massDiff = a.mu - b.mu
+    massDiff = b.mu - a.mu
 
     # calculate relevant angles
     try:
         theta1 = atan(a.vy / a.vx)
     except ZeroDivisionError:
-        if a.vy >= 0:
-            theta1 = pi / 2
-        else:
-            theta1 = - pi / 2
+        theta1 = pi / 2
+
     if a.vx <= 0 and a.vy <= 0:
-        theta1 += pi  # Q1 --> Q3
+        theta1 += pi  # Q1 --> Q3, pi/2 --> 3pi/2
     elif a.vx <= 0 and a.vy >= 0:
         theta1 += pi  # Q4 --> Q2
 
     try:
         theta2 = atan(b.vy / b.vx)
     except ZeroDivisionError:
-        if b.vy >= 0:
-            theta2 = pi / 2
-        else:
-            theta2 = - pi / 2
+        theta2 = pi / 2
+
     if b.vx <= 0 and b.vy <= 0:
-        theta2 += pi  # Q1 --> Q3
+        theta2 += pi  # Q1 --> Q3, pi/2 --> 3pi/2
     elif b.vx <= 0 and b.vy >= 0:
         theta2 += pi  # Q4 --> Q2
 
     try:
         phi = atan( (b.y - a.y) / (b.x - a.x) )
     except ZeroDivisionError:
-        if (b.y - a.y) >= 0:
-            phi = pi / 2
-        else:
-            phi = - pi / 2
+        phi = pi / 2
+
     if (b.x - a.x) <= 0 and (b.y - a.y) <= 0:
-        phi += pi  # Q1 --> Q3
+        phi += pi  # Q1 --> Q3, pi/2 --> 3pi/2
     elif (b.x - a.x) <= 0 and (b.y - a.y) >= 0:
         phi += pi  # Q4 --> Q2
     
@@ -133,11 +130,11 @@ def elastic_collision(a, b):
     v2 = sqrt(b.vx ** 2 + b.vy ** 2)
 
     # calculate new velocity components. equation from wikipedia
-    vax = (v1 * cos(theta1 - phi) * massDiff + \
+    vax = (v1 * cos(theta1 - phi) * -massDiff + \
         2 * b.mu * v2 * cos(theta2 - phi)) / totalMass * cos(phi) + \
             v1 * sin(theta1 - phi) * cos(phi + pi / 2)
 
-    vay = (v1 * cos(theta1 - phi) * massDiff + \
+    vay = (v1 * cos(theta1 - phi) * -massDiff + \
         2 * b.mu * v2 * cos(theta2 - phi)) / totalMass * sin(phi) + \
             v1 * sin(theta1 - phi) * sin(phi + pi / 2)
 
