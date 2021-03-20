@@ -132,7 +132,6 @@ def draw_bodies(surface):
 print("\nThanks for using my gravity simulator!")
 print("I've prepared 6 demo setups, or you can create one on your own!")
 print("The simulation opens in a new window. You may need to click on it.")
-print("Elastic collisions are coming soon!")
 print("Go ahead and enter a number for your selection below:")
 
 

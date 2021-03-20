@@ -11,7 +11,7 @@ This is my gravity/momentum simulator, originally created as part of my IB Exten
 
 ## General info
 This is a physics simulator capable of modelling n-body gravitational dynamics between multiple bodies, as well as conservation of momentum in collisions between bodies. It allows the user to choose between several demo simulations or create one of their own, and then to control the simulation by playing, pausing, and reversing the simulation, among other controls.
-![image](https://user-images.githubusercontent.com/62124462/111857307-2e985680-88f6-11eb-9a54-3207548eb58b.png)
+![image](https://user-images.githubusercontent.com/62124462/111887639-fe0af800-899b-11eb-808d-86a3d1f3cd79.png)
 
 
 It was originally created to simulate the restricted 3-body problem between the Earth, the Moon, and a satellite, but has since been expanded for general application. The code was written in Python 3 and the simulation's algorithms were based on the real physics equations around gravitational field and momentum.
@@ -24,10 +24,9 @@ It was originally created to simulate the restricted 3-body problem between the 
 * Fast-forward the simulation
 * Run the simulation in reverse time
 * Toggle gravity on and off
+* Toggle between elastic and inelastic collisions
 
 ### To Do:
-* Simulate elastic collisions without significant error
-* Toggle between elastic and inelastic collisions
 * Make each body's colour immutable and inherent to the body instead of potentially changing when other bodies collide
 * Create and insert custom bodies into the system by clicking and dragging on the GUI canvas
 * Phase out the need for a CLI by choosing demo simulations directly in the GUI
