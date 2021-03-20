@@ -1,6 +1,6 @@
 # setup.py
 # Tawfeeq Mannan
-# Last updated 2021/03/19
+# Last updated 2021/03/20
 
 # imports
 from math import sqrt
@@ -125,8 +125,9 @@ allCelestials = [
 
     # elastic collision test
     [
-        Celestial(0, 0, 0, 0, 500000, 10000),
         Celestial(500000, 0, -2, 0, 500000, 10000),
+        Celestial(0, 0, 0, 0, 500000, 10000),
+        Celestial(-500000, 0, 0, 0, 500000, 10000),
     ],
 ]
 

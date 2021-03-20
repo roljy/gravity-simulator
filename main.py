@@ -1,6 +1,6 @@
 # gravity.py
 # Tawfeeq Mannan
-# Last updated 2021/03/19
+# Last updated 2021/03/20
 
 # imports
 import pygame
@@ -44,7 +44,7 @@ buttons = {
                 img=absolute_path("img/gravity.png")),
     "elastic" : Button(60, 10, 40, 40, \
         (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
-            state=False, disabled=True, hold=False, \
+            state=False, disabled=False, hold=False, \
                 img=absolute_path("img/elastic.png")),
     "reverse" : Button(WIDTH - 150, 10, 40, 40, \
         (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
@@ -87,7 +87,7 @@ def move_bodies(forwardsTime, gravity, previousCollisions):
             elasticOverride = False
 
             # elastic collision
-            if contact and buttons["elastic"].isPressed:
+            if buttons["elastic"].isPressed:
                 v1 = celestials[i].vx ** 2 + celestials[i].vy ** 2
                 v2 = celestials[j].vx ** 2 + celestials[j].vy ** 2
                 if buttons["gravity"].isPressed and (v1 < 1 or v2 < 1 or \
