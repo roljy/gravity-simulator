@@ -123,7 +123,7 @@ def draw_bodies(surface):
     for i in range(len(celestials)):
         x = WIDTH / 2 + celestials[i].x / 1500
         y = HEIGHT / 2 - celestials[i].y / 1500
-        dotSize = celestials[i].r / 1500 if celestials[i].r != 0 else 1.5
+        dotSize = celestials[i].r / 1500 if celestials[i].r > 1500 else 1
         colour = list(COLOURS.values())[i % (len(COLOURS) - 3) + 3]
         pygame.draw.circle(surface, colour, (x, y), dotSize)
 
