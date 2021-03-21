@@ -4,6 +4,7 @@
 
 # imports
 from math import sqrt
+from colour import COLOURS
 from Celestial import Celestial
 
 
@@ -80,28 +81,28 @@ def getCelestials():
 allCelestials = [
     # earth, moon, lunar satellite, and two earth satellites.
     [
-        Celestial(100000, 0, 0, 2, 0, 0),
-        Celestial(230000, 0, 0, 1.33, 0, 0),
-        Celestial(370000, 0, 0, 1.6, 0, 0),
-        Celestial(384400, 0, 0, 1.0183, 4900, 1737),
-        Celestial(0, 0, 0, 0, 398600, 6371),
+        Celestial(100000, 0, 0, 2, 0, 0, COLOURS["YELLOW"]),
+        Celestial(230000, 0, 0, 1.33, 0, 0, COLOURS["ORANGE"]),
+        Celestial(370000, 0, 0, 1.6, 0, 0, COLOURS["RED"]),
+        Celestial(384400, 0, 0, 1.0183, 4900, 1737, COLOURS["GREY"]),
+        Celestial(0, 0, 0, 0, 398600, 6371, COLOURS["CYAN"]),
     ],
 
 
     # three bodies creeping to the right.
     #     former two orbit the latter.
     [
-        Celestial(-500000, -150000, 1.55, 0, 1000, 2000),
-        Celestial(-500000, 50000, -2.3, 0, 10000, 5000),
-        Celestial(-500000, 0, 0.2, 0, 300000, 10000),
+        Celestial(-500000, -150000, 1.55, 0, 1000, 2000, COLOURS["RED"]),
+        Celestial(-500000, 50000, -2.3, 0, 10000, 5000, COLOURS["ORANGE"]),
+        Celestial(-500000, 0, 0.2, 0, 300000, 10000, COLOURS["YELLOW"]),
     ],
 
 
     # three bodies in chaotic but non-colliding orbit.
     [
-        Celestial(300000, 0, 0, 0.2, 2500, 2000),
-        Celestial(100000, -50000, 0, 0.1, 5000, 5000),
-        Celestial(-100000, 50000, 0, -0.1, 10000, 10000),
+        Celestial(300000, 0, 0, 0.2, 2500, 2000, COLOURS["RED"]),
+        Celestial(100000, -50000, 0, 0.1, 5000, 5000, COLOURS["ORANGE"]),
+        Celestial(-100000, 50000, 0, -0.1, 10000, 10000, COLOURS["YELLOW"]),
     ],
 
 
@@ -109,25 +110,25 @@ allCelestials = [
     #     first object throws the orbits out of balance.
     [
         # Celestial(0, 500000, 0, 0, 100),
-        Celestial(-50000, 50000, 0, -0.073, 2500, 2000),
-        Celestial(50000, -50000, 0, 0.073, 2500, 2000),
-        Celestial(400000, 0, 0, 0.13, 10000, 10000),
-        Celestial(-400000, 0, 0, -0.13, 10000, 10000),
+        Celestial(-50000, 50000, 0, -0.077, 2500, 2000, COLOURS["RED"]),
+        Celestial(50000, -50000, 0, 0.077, 2500, 2000, COLOURS["ORANGE"]),
+        Celestial(400000, 0, 0, 0.13, 10000, 10000, COLOURS["GREEN"]),
+        Celestial(-400000, 0, 0, -0.13, 10000, 10000, COLOURS["CYAN"]),
     ],
 
     # two binary "stars" with two small masses in chaotic fall
     [
-        Celestial(500000, 0, 0, 0, 1000, 2000),
-        Celestial(-500000, 0, 0, 0, 1000, 2000),
-        Celestial(200000, 0, 0, 0.35, 100000, 10000),
-        Celestial(-200000, 0, 0, -0.35, 100000, 10000),
+        Celestial(500000, 0, 0, 0, 1000, 2000, COLOURS["RED"]),
+        Celestial(-500000, 0, 0, 0, 1000, 2000, COLOURS["ORANGE"]),
+        Celestial(200000, 0, 0, 0.35, 100000, 10000, COLOURS["GREEN"]),
+        Celestial(-200000, 0, 0, -0.35, 100000, 10000, COLOURS["CYAN"]),
     ],
 
     # elastic collision test
     [
-        Celestial(500000, 0, -2, 0, 500000, 10000),
-        Celestial(0, 0, 0, 0, 500000, 10000),
-        Celestial(-500000, 0, 0, 0, 500000, 10000),
+        Celestial(500000, 0, -2, 0, 500000, 10000, COLOURS["RED"]),
+        Celestial(0, 0, 0, 0, 500000, 10000, COLOURS["ORANGE"]),
+        Celestial(-500000, 0, 0, 0, 500000, 10000, COLOURS["YELLOW"]),
     ],
 ]
 

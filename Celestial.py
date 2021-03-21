@@ -8,17 +8,19 @@ from math import sqrt, sin, cos, atan, pi
 
 # class definition
 class Celestial:
-    def __init__(self, x, y, vx=0, vy=0, Gm=0, r=0):
+    def __init__(self, x, y, vx=0, vy=0, Gm=0, r=0, c=(255, 0, 0)):
         self.x = x
         self.y = y
         self.vx = vx
         self.vy = vy
         self.mu = Gm
         self.r = r
+        self.colour = c
     
 
     def get_copy(self):
-        copy = Celestial(self.x, self.y, self.vx, self.vy, self.mu, self.r)
+        copy = Celestial(self.x, self.y, self.vx, self.vy, \
+            self.mu, self.r, self.colour)
         return copy
 
 
@@ -92,7 +94,10 @@ def inelastic_collision(a, b):
     # new radius to reflect sum of area
     r = sqrt(a.r ** 2 + b.r ** 2)
 
-    return Celestial(x, y, vx, vy, totalMass, r)
+    # new colour based on larger body
+    c = b.colour if b.r > a.r else a.colour
+
+    return Celestial(x, y, vx, vy, totalMass, r, c)
 
 
 def elastic_collision(a, b):

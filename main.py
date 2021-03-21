@@ -6,6 +6,7 @@
 import pygame
 import sys
 from abspath import absolute_path
+from colour import COLOURS
 from Button import Button
 from Celestial import inelastic_collision, elastic_collision
 from setup import helpMsg, getCelestials, allCelestials, allStaticBodies
@@ -15,17 +16,6 @@ from setup import helpMsg, getCelestials, allCelestials, allStaticBodies
 WIDTH = 1280
 HEIGHT = 720
 T_STEP = 360
-COLOURS = {
-    "BLACK" : (0, 0, 0),
-    "WHITE" : (255, 255, 255),
-    "GREY" : (127, 127, 127),
-    "RED" : (255, 0, 0),
-    "ORANGE" : (255, 160, 0),
-    "YELLOW" : (255, 255, 0),
-    "GREEN" : (0, 255, 0),
-    "CYAN" : (0, 255, 255),
-    "PINK" : (255, 0, 160),
-}
 
 
 # global vars
@@ -140,7 +130,7 @@ def draw_bodies(surface):
         x = WIDTH / 2 + celestials[i].x / 1500
         y = HEIGHT / 2 - celestials[i].y / 1500
         dotSize = celestials[i].r / 1500 if celestials[i].r > 1500 else 1
-        colour = list(COLOURS.values())[i % (len(COLOURS) - 3) + 3]
+        colour = celestials[i].colour
         pygame.draw.circle(surface, colour, (x, y), dotSize)
 
 

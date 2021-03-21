@@ -27,7 +27,6 @@ It was originally created to simulate the restricted 3-body problem between the 
 * Toggle between elastic and inelastic collisions
 
 ### To Do:
-* Make each body's colour immutable and inherent to the body instead of potentially changing when other bodies collide
 * Create and insert custom bodies into the system by clicking and dragging on the GUI canvas
 * Phase out the need for a CLI by choosing demo simulations directly in the GUI
 

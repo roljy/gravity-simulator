@@ -1,6 +1,6 @@
-# relpath.py
+# abspath.py
 # Tawfeeq Mannan
-# Last updated 2021/03/19
+# Last updated 2021/03/20
 
 import sys
 import os
