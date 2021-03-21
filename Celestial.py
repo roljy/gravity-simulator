@@ -15,6 +15,11 @@ class Celestial:
         self.vy = vy
         self.mu = Gm
         self.r = r
+    
+
+    def get_copy(self):
+        copy = Celestial(self.x, self.y, self.vx, self.vy, self.mu, self.r)
+        return copy
 
 
     def get_scalar_distance_to(self, x, y):

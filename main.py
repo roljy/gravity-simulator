@@ -14,7 +14,6 @@ from setup import helpMsg, getCelestials, allCelestials, allStaticBodies
 # consts
 WIDTH = 1280
 HEIGHT = 720
-FPS = 120
 T_STEP = 360
 COLOURS = {
     "BLACK" : (0, 0, 0),
@@ -32,7 +31,9 @@ COLOURS = {
 # global vars
 celestials = []
 t = 0
+FPS = 120
 lastCollisionTime = 0
+runAgain = True
 isRunning = True
 
 
@@ -62,6 +63,21 @@ buttons = {
 
 
 # function definitions
+def reset():
+    global celestials, t, FPS, lastCollisionTime, runAgain, isRunning, buttons
+    celestials = []
+    t = 0
+    FPS = 120
+    lastCollisionTime = 0
+    runAgain = True
+    isRunning = True
+    buttons["gravity"].isPressed = True
+    buttons["elastic"].isPressed = False
+    buttons["reverse"].isPressed = False
+    buttons["playpause"].isPressed = False
+    buttons["skip"].isPressed = False
+
+
 def move_bodies(forwardsTime, gravity, previousCollisions):
     global celestials, t, lastCollisionTime, T_STEP
     collisions = set()
@@ -135,79 +151,91 @@ print("The simulation opens in a new window. You may need to click on it.")
 print("Go ahead and enter a number for your selection below:")
 
 
-# select system to simulate based on user input
-print('\n' + helpMsg)
-choice = 0
-while True:
-    try:
-        prompt = "Enter the number for the system of your choice: "
-        choice = int(input(prompt))
-        if not 0 <= choice <= len(allCelestials):
-            raise ValueError
-        print()
-        break
-    except ValueError:
-        print("Please enter an integer between 0 and 6.\n")
+while runAgain:
+    reset()
+
+    # select system to simulate based on user input
+    print('\n' + helpMsg)
+    choice = 0
+    while True:
+        try:
+            prompt = "Enter the number for the system of your choice: "
+            choice = int(input(prompt))
+            if not 0 <= choice <= len(allCelestials):
+                raise ValueError
+            print()
+            break
+        except ValueError:
+            print("Please enter an integer between 0 and 6.\n")
 
 
-# use user choice to define variables
-staticBodies = []
+    # use user choice to define variables
+    staticBodies = []
 
-if choice != 0:
-    celestials = allCelestials[choice - 1]
-    staticBodies = allStaticBodies[choice - 1]
-else:
-    celestials, staticBodies = getCelestials()
-
-
-# initialize pygame
-pygame.init()
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Gravity Simulator")
-pygame.display.set_icon(pygame.image.load(absolute_path("img/planets.ico")))
-clock = pygame.time.Clock()
+    if choice != 0:
+        celestials = [c.get_copy() for c in allCelestials[choice - 1]]
+        staticBodies = allStaticBodies[choice - 1].copy()
+    else:
+        celestials, staticBodies = getCelestials()
 
 
-# running loop
-print("Celestial bodies loaded. Running simulation...")
-lastCollisions, collTime = set(), 0  # for debouncing
-while isRunning:
-    # screen refresh
-    clock.tick(FPS)
-    SCREEN.fill(COLOURS["BLACK"])
+    # initialize pygame
+    pygame.init()
+    SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+    pygame.display.set_caption("Gravity Simulator")
+    pygame.display.set_icon(pygame.image.load(absolute_path("img/planets.ico")))
+    clock = pygame.time.Clock()
 
-    # event handling (button presses, quit)
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            isRunning = False
 
+    # game loop
+    print("Celestial bodies loaded. Running simulation...")
+    lastCollisions, collTime = set(), 0  # for debouncing
+    while isRunning:
+        # screen refresh
+        clock.tick(FPS)
+        SCREEN.fill(COLOURS["BLACK"])
+
+        # event handling (button presses, quit)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                isRunning = False
+
+            for button in buttons.values():
+                button.handle_event(event)
+        
+        # motion execution
+        collisions = set()
+
+        if buttons["playpause"].isPressed and buttons["skip"].isPressed:
+            FPS = 360  # fast forward
+            collisions = move_bodies(not buttons["reverse"].isPressed, \
+                buttons["gravity"].isPressed, lastCollisions)
+
+        elif buttons["playpause"].isPressed or buttons["skip"].isPressed:
+            FPS = 120  # normal speed
+            collisions = move_bodies(not buttons["reverse"].isPressed, \
+                buttons["gravity"].isPressed, lastCollisions)
+        
+        lastCollisions = collisions
+
+        # draw all celestials and update screen
+        draw_bodies(SCREEN)
         for button in buttons.values():
-            button.handle_event(event)
+            button.draw(SCREEN)
+
+        pygame.display.update()
+
+
+    # close pygame window
+    pygame.display.quit()
+    pygame.quit()
     
-    # motion execution
-    collisions = set()
 
-    if buttons["playpause"].isPressed and buttons["skip"].isPressed:
-        FPS = 360  # fast forward
-        collisions = move_bodies(not buttons["reverse"].isPressed, \
-            buttons["gravity"].isPressed, lastCollisions)
+    # ask for repetition
+    again = input("\nDo you want to run the simulation again? (y/n) ")
+    if not again.lower().startswith('y'):
+        runAgain = False
 
-    elif buttons["playpause"].isPressed or buttons["skip"].isPressed:
-        FPS = 120  # normal speed
-        collisions = move_bodies(not buttons["reverse"].isPressed, \
-            buttons["gravity"].isPressed, lastCollisions)
-    
-    lastCollisions = collisions
-
-    # draw all celestials and update screen
-    draw_bodies(SCREEN)
-    for button in buttons.values():
-        button.draw(SCREEN)
-
-    pygame.display.update()
-    
 
 # cleanup and exit
-pygame.display.quit()
-pygame.quit()
 sys.exit()
