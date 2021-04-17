@@ -1,10 +1,11 @@
 # Button.py
 # Tawfeeq Mannan
-# Last updated 2021/03/19
+# Last updated 2021/04/17
 
 # imports
 import pygame
 from abspath import absolute_path
+from colour import COLOURS
 
 
 # class definition
@@ -64,3 +65,37 @@ class Button:
         coords = (self.rect.x + (self.rect.width - self.img.get_width()) / 2, \
             self.rect.y + (self.rect.height - self.img.get_height()) / 2)
         surface.blit(self.img, coords)
+
+
+# buttons
+buttons = {
+    "gravity" : Button(10, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=True, disabled=False, hold=False, \
+                img=absolute_path("img/gravity.png")),
+    "elastic" : Button(10, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=False, hold=False, \
+                img=absolute_path("img/elastic.png")),
+    "reverse" : Button(10, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=False, hold=False, \
+                img=absolute_path("img/reverse.png")),
+    "playpause" : Button(10, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=False, hold=False, \
+                img=absolute_path("img/playpause.png")),
+    "skip" : Button(10, 10, 40, 40, \
+        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
+            state=False, disabled=False, hold=True, \
+                img=absolute_path("img/skip.png")),
+}
+
+
+# function definitions
+def reposition_buttons(w, h):
+    buttons["gravity"].rect.update(10, 10, 40, 40)
+    buttons["elastic"].rect.update(60, 10, 40, 40)
+    buttons["reverse"].rect.update(w - 150, 10, 40, 40)
+    buttons["playpause"].rect.update(w - 100, 10, 40, 40)
+    buttons["skip"].rect.update(w - 50, 10, 40, 40)

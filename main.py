@@ -1,18 +1,18 @@
-# gravity.py
+# main.py
 # Tawfeeq Mannan
-# Last updated 2021/03/20
+# Last updated 2021/04/17
 
 # imports
 import pygame
 import sys
 from abspath import absolute_path
 from colour import COLOURS
-from Button import Button
+from Button import Button, buttons, reposition_buttons
 from Celestial import inelastic_collision, elastic_collision
 from setup import helpMsg, getCelestials, allCelestials, allStaticBodies
 
 
-# consts
+# "consts"
 WIDTH = 1280
 HEIGHT = 720
 T_STEP = 360
@@ -25,31 +25,6 @@ FPS = 120
 lastCollisionTime = 0
 runAgain = True
 isRunning = True
-
-
-# buttons
-buttons = {
-    "gravity" : Button(10, 10, 40, 40, \
-        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
-            state=True, disabled=False, hold=False, \
-                img=absolute_path("img/gravity.png")),
-    "elastic" : Button(60, 10, 40, 40, \
-        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
-            state=False, disabled=False, hold=False, \
-                img=absolute_path("img/elastic.png")),
-    "reverse" : Button(WIDTH - 150, 10, 40, 40, \
-        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
-            state=False, disabled=False, hold=False, \
-                img=absolute_path("img/reverse.png")),
-    "playpause" : Button(WIDTH - 100, 10, 40, 40, \
-        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
-            state=False, disabled=False, hold=False, \
-                img=absolute_path("img/playpause.png")),
-    "skip" : Button(WIDTH - 50, 10, 40, 40, \
-        (COLOURS["GREEN"], COLOURS["RED"], COLOURS["GREY"]), \
-            state=False, disabled=False, hold=True, \
-                img=absolute_path("img/skip.png")),
-}
 
 
 # function definitions
@@ -171,9 +146,10 @@ while runAgain:
 
     # initialize pygame
     pygame.init()
-    SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+    SCREEN = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("Gravity Simulator")
     pygame.display.set_icon(pygame.image.load(absolute_path("img/planets.ico")))
+    reposition_buttons(WIDTH, HEIGHT)
     clock = pygame.time.Clock()
 
 
@@ -189,6 +165,10 @@ while runAgain:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 isRunning = False
+            
+            if event.type == pygame.VIDEORESIZE:
+                WIDTH, HEIGHT = event.w, event.h
+                reposition_buttons(WIDTH, HEIGHT)
 
             for button in buttons.values():
                 button.handle_event(event)
